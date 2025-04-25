@@ -1,3 +1,7 @@
+exp_log/
+wandb/
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
