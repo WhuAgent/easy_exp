@@ -9,6 +9,5 @@ setup(
     description='Easy Experiment Framework for Machine Learning',
     url="https://github.com/WhuAgent/easy_exp",
     packages=find_packages(),
-    install_requires=requirements,
-    package_dir={"":"easy_exp"}
+    install_requires=requirements
 )
