@@ -175,6 +175,7 @@ if __name__ == "__main__":
                        name=method_name,
                        config=config, 
                        wandb_enabled=wandb_enabled,
-                       restore_from="jdhoyspk") as runner:
+                       restore_from="92xi1igb"
+                       ) as runner:
         runner.run(dataset, model, metric)
 

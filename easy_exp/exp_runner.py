@@ -79,17 +79,18 @@ class BaseExpRunner:
         pass
         
 
-    def record(self, results: Dict[str, Any]):
+    def record(self, results: Dict[str, Any], restore_flag):
         """记录单步指标"""
         final_log_path = None
         if "log_path" in results:
-            final_log_path = os.path.normpath(os.path.join("exp_log", results.pop("log_path")))
-            os.makedirs(os.path.dirname(final_log_path), exist_ok=True)
-            try:
-                if os.path.exists("temp.log"):
-                    shutil.move("temp.log", final_log_path)
-            except Exception as e:
-                print(f"Failed to move log file: {e}")
+            final_log_path = os.path.normpath(os.path.join("exp_log", results.get("log_path")))
+            if not restore_flag:
+                os.makedirs(os.path.dirname(final_log_path), exist_ok=True)
+                try:
+                    if os.path.exists("temp.log"):
+                        shutil.move("temp.log", final_log_path)
+                except Exception as e:
+                    print(f"Failed to move log file: {e}")
         
         if self.wandb_enabled:
             wandb.log(results)
@@ -109,17 +110,21 @@ class BaseExpRunner:
                 data_str = json.dumps(data, indent=4)
                 click.echo(click.style(f"Evaluating: \n{data_str}", fg='blue'))
                 
+                if os.path.exists("temp.log"): # 清理上次的log
+                    os.remove("temp.log")
                 with open("temp.log", "w", encoding="UTF-8") as f, redirect_stdout(f):
                     if self.restored_data and i < len(self.restored_data):
                         click.echo(click.style(f"Restore from existing data...", fg='yellow'))
                         results = self.restored_data[i]
+                        restore_flag = True
                     else:
                         results = self.exp_one_step(i, data, model, metric)
+                        restore_flag = False
                 
                 if results is not None:
                     results_str = json.dumps(results, indent=4)
                     click.echo(click.style(f"Results: \n{results_str}", fg='green'))
-                    self.record(results)
+                    self.record(results, restore_flag)
                 else:
                     click.echo(click.style("No results", fg='red'))
                     
