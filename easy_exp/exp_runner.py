@@ -13,6 +13,8 @@ from functools import wraps
 import os
 from tqdm import tqdm
 
+from easy_exp.dataset import Dataset
+
 
 class BaseExpRunner:
     def __init__(self, 
@@ -101,10 +103,9 @@ class BaseExpRunner:
         """子类需要重写的实验逻辑方法"""
         raise NotImplementedError("Subclasses must implement exp_one_step() method")
 
-    def run(self, dataset, model, metric, ):
+    def run(self, dataset: Dataset, model, metric, ):
         """运行实验的入口方法，自动处理所有循环"""
-        total = len(dataset) if hasattr(dataset, '__len__') else None
-        for i, data in tqdm(enumerate(dataset), total=total):
+        for i, data in tqdm(enumerate(dataset), total=len(dataset)):
             try:
                 print() # 打印空行
                 data_str = json.dumps(data, indent=4)
@@ -112,6 +113,7 @@ class BaseExpRunner:
                 
                 if os.path.exists("temp.log"): # 清理上次的log
                     os.remove("temp.log")
+                
                 with open("temp.log", "w", encoding="UTF-8") as f, redirect_stdout(f):
                     if self.restored_data and i < len(self.restored_data):
                         click.echo(click.style(f"Restore from existing data...", fg='yellow'))

@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from typing import Dict, Any, List
 
-from easy_exp.dataset import BaseDataset
+from easy_exp.dataset import Dataset
 from easy_exp.model import BaseModel
 from easy_exp.metric import BaseMetric
 from easy_exp.exp_runner import BaseExpRunner
@@ -14,28 +14,6 @@ from utils.chat import chat_llm
 
 
 DEBUG = True if sys.gettrace() is not None else False
-
-
-class ProblemDataset(BaseDataset):
-    """数学问题数据集类"""
-    
-    def __init__(self, file_path: str):
-        self.problems = self._load_problems(file_path)
-        
-    def _load_problems(self, file_path: str) -> List[Dict[str, Any]]:
-        """从JSON文件加载问题数据"""
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-            
-    def get_data(self) -> List[Dict[str, Any]]:
-        """获取所有问题数据"""
-        return self.problems
-        
-    def __len__(self) -> int:
-        return len(self.problems)
-        
-    def __getitem__(self, idx: int) -> Dict[str, Any]:
-        return self.problems[idx]
 
 
 class ProblemModel(BaseModel):
@@ -154,12 +132,12 @@ class MATHExpRunner(BaseExpRunner):
 
 
 if __name__ == "__main__":
-    dataset = ProblemDataset("sampled_problems.json")
+    dataset = Dataset.from_json("sampled_problems.json")
     model = ProblemModel()
     metric = ProblemMetric()
     
     project = "agent-network-math"
-    method_name = "test_easy_exp_restore"
+    method_name = "test_easy_dataset"
     config = {
         "method": method_name,
         "level": 5,
@@ -168,14 +146,13 @@ if __name__ == "__main__":
     }
     
     wandb_enabled = False if DEBUG else True
-    wandb_enabled = True
     
     # 请在这里补全实验代码
     with MATHExpRunner(project=project,
                        name=method_name,
                        config=config, 
                        wandb_enabled=wandb_enabled,
-                       restore_from="92xi1igb"
+                    #    restore_from="92xi1igb"
                        ) as runner:
         runner.run(dataset, model, metric)
 
