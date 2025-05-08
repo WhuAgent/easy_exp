@@ -51,8 +51,8 @@ class OpenAIMessage(Message):
 
         self.model = model
         self.prompt_token_num = prompt_tokens
-        self.prompt_token_cost = model_cost[self.model]["prompt_token"] * self.prompt_token_num / 1000
+        # self.prompt_token_cost = model_cost[self.model]["prompt_token"] * self.prompt_token_num / 1000
         self.completion_token_num = completion_tokens
-        self.completion_token_cost = model_cost[self.model]["completion_token"] * self.completion_token_num / 1000
+        # self.completion_token_cost = model_cost[self.model]["completion_token"] * self.completion_token_num / 1000
         self.token_num = self.prompt_token_num + self.completion_token_num
-        self.token_cost = self.prompt_token_cost + self.completion_token_cost
+        # self.token_cost = self.prompt_token_cost + self.completion_token_cost
