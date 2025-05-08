@@ -4,6 +4,7 @@
 支持wandb记录的可选集成
 """
 from contextlib import redirect_stdout
+from datetime import datetime
 import json
 import shutil
 import click
@@ -77,9 +78,7 @@ class BaseExpRunner:
                 dowload_cnt += 1
 
         return data
-        
-        pass
-        
+
 
     def record(self, results: Dict[str, Any], restore_flag):
         """记录单步指标"""
@@ -129,8 +128,21 @@ class BaseExpRunner:
                     self.record(results, restore_flag)
                 else:
                     click.echo(click.style("No results", fg='red'))
-                    
+            except KeyboardInterrupt as e:
+                if self.wandb_enabled:
+                    wandb.finish()
+                break
             except Exception as e:
+                import traceback
+                error_trace_back = traceback.format_exc()
+                with open("error.log", "a", encoding="UTF-8") as f:
+                    f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    f.write("While Evaluating: \n")
+                    f.write(data_str)
+                    f.write("\n")
+                    f.write(error_trace_back)
+                    f.write("\n")
+                    f.write("\n")
                 click.echo(click.style(f"Error processing step {i}: {str(e)}", fg='red'))
                 continue
 
