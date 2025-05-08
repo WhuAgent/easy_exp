@@ -1,0 +1,13 @@
+deepseek:
+    api_key: sk-ca3583e3026949299186dcbf3fc34f8c
+    base_url: https://api.deepseek.com
+    defalut_model: deepseek-chat
+default_model: qwen2.5-32b-instruct
+openai:
+    api_key: sk-NyiTFkWTnHGuF25INh29qiWM3KPONCoRV08o4Sht0kcCedUN
+    base_url: https://poloai.top/v1
+    defalut_model: gpt-3.5-turbo
+qwen:
+    api_key: sk-c9b6099bcdfe4a32ae08365538aef102
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    default_model: qwen2.5-32b-instruct

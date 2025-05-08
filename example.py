@@ -1,16 +1,14 @@
 import re
 import sys
-import json
 from datetime import datetime
-from typing import Dict, Any, List
 
 from easy_exp.dataset import Dataset
 from easy_exp.model import BaseModel
 from easy_exp.metric import BaseMetric
 from easy_exp.exp_runner import BaseExpRunner
 
-from utils.message import SystemMessage, UserMessage
-from utils.chat import chat_llm
+from easy_exp.llm.message import SystemMessage, UserMessage
+from easy_exp.llm import llm
 
 
 DEBUG = True if sys.gettrace() is not None else False
@@ -18,16 +16,14 @@ DEBUG = True if sys.gettrace() is not None else False
 
 class ProblemModel(BaseModel):
     def predict(self, problem: str) -> str:
+        llm.init()
         start = datetime.now()
         messages = [
             SystemMessage("You are a professional mathematician. You are given a problem and you need to solve it. Please put the answer in \\boxed{}"),
             UserMessage(problem)
         ]
 
-        response = chat_llm(messages,
-                            model="qwen2.5-32b-instruct",
-                            api_key="sk-cf690968fd414e058f7cb0d2d3273c22",
-                            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
+        response = llm.chat_llm(messages, model="qwen2.5-32b-instruct")
 
         end = datetime.now()
 
@@ -40,11 +36,13 @@ class ProblemModel(BaseModel):
         print()
         print()
         print("------------------------Response------------------------")
-        print(response.content)
+        print(response)
         print()
         print()
+        
+        token_cost = llm.report()
 
-        return response.content, (end - start).total_seconds(),  response.token_cost
+        return response.content, (end - start).total_seconds(), token_cost
 
 
 class ProblemMetric(BaseMetric):
@@ -64,7 +62,7 @@ class ProblemMetric(BaseMetric):
 
     def check(self, problem, answer, solution):
         if answer is None:
-            return False, 0
+            return False
         system_prompt = "You are an experienced mathematics teacher with a strong grasp of logical reasoning and precise calculations, capable of quickly identifying the core of mathematical problems and evaluating the consistency between answers and solution processes."
         user_prompt = "Here is the math problem:\n\n{problem} \n\n with standard solution:\n\n{solution}\n\n The student's answer is:\n\n{answer}\n\n Please check whether the answer is correct or not. Please answer in True or False directly without any additional explanations."
         messages = [
@@ -72,15 +70,12 @@ class ProblemMetric(BaseMetric):
             UserMessage(user_prompt.format(problem=problem, solution=solution, answer=answer))
         ]
 
-        response = chat_llm(messages,
-                            model="qwen2.5-32b-instruct",
-                            api_key="sk-cf690968fd414e058f7cb0d2d3273c22",
-                            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
+        response = llm.chat_llm(messages, model="qwen-turbo-latest")
 
         if re.search("true", response.content.strip().lower()):
-            return True, response.token_cost
+            return True
         else:
-            return False, response.token_cost
+            return False
 
     def compute(self, problem, answer, progress, time, token_cost):
         from utils.math import get_answer
@@ -96,7 +91,7 @@ class ProblemMetric(BaseMetric):
         print()
         print()
 
-        correct, _ = self.check(problem, answer, solution)
+        correct = self.check(problem, answer, solution)
         
         self.count += 1
         self.correct_count += correct
