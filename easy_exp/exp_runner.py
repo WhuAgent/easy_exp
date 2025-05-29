@@ -9,6 +9,7 @@ import json
 import shutil
 import click
 import wandb
+import sys
 from typing import Callable, Any, Dict, Optional
 from functools import wraps
 import os
@@ -112,8 +113,10 @@ class BaseExpRunner:
                 
                 if os.path.exists("temp.log"): # 清理上次的log
                     os.remove("temp.log")
-                
-                with open("temp.log", "w", encoding="UTF-8") as f, redirect_stdout(f):
+
+                DEBUG = True if sys.gettrace() is not None else False
+
+                if DEBUG:
                     if self.restored_data and i < len(self.restored_data):
                         click.echo(click.style(f"Restore from existing data...", fg='yellow'))
                         results = self.restored_data[i]
@@ -121,6 +124,15 @@ class BaseExpRunner:
                     else:
                         results = self.exp_one_step(i, data, model, metric)
                         restore_flag = False
+                else:
+                    with open("temp.log", "w", encoding="UTF-8") as f, redirect_stdout(f):
+                        if self.restored_data and i < len(self.restored_data):
+                            click.echo(click.style(f"Restore from existing data...", fg='yellow'))
+                            results = self.restored_data[i]
+                            restore_flag = True
+                        else:
+                            results = self.exp_one_step(i, data, model, metric)
+                            restore_flag = False
                 
                 if results is not None:
                     results_str = json.dumps(results, indent=4)
