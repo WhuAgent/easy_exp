@@ -4,7 +4,7 @@ import yaml
 from easy_exp.llm.message import Message
 from openai import OpenAI
 
-llm_config_path = os.path.join(os.getcwd(), 'easy_exp/llm/config.yaml')
+llm_config_path = os.path.join(os.getcwd(), 'llm.yaml')
 with open(llm_config_path, "r", encoding="UTF-8") as f:
     llm_config = yaml.safe_load(f)
     
@@ -70,7 +70,15 @@ def chat_llm(messages, **kwargs):
         response_text = json.loads(response_text)
         
     openai_messages.append({"role": "assistant", "content": response_text})
-    print(json.dumps(openai_messages, indent=4, ensure_ascii=False))
+    # print(json.dumps(openai_messages, indent=4, ensure_ascii=False))
+
+    print("###################################################################")
+    for message in openai_messages:
+        print("--------------------------------------------")
+        print(f"{message['role']}:")
+        print()
+        print(message["content"])
+        print()
 
     return response_text
 
