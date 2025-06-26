@@ -120,6 +120,7 @@ class BaseExpRunner:
                     if self.restored_data and i < len(self.restored_data):
                         click.echo(click.style(f"Restore from existing data...", fg='yellow'))
                         results = self.restored_data[i]
+                        metric.record(**results)
                         restore_flag = True
                     else:
                         results = self.exp_one_step(i, data, model, metric)
@@ -129,6 +130,7 @@ class BaseExpRunner:
                         if self.restored_data and i < len(self.restored_data):
                             click.echo(click.style(f"Restore from existing data...", fg='yellow'))
                             results = self.restored_data[i]
+                            metric.record(**results)
                             restore_flag = True
                         else:
                             results = self.exp_one_step(i, data, model, metric)

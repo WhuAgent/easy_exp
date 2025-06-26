@@ -9,6 +9,9 @@ class BaseMetric(ABC):
         """计算评估指标"""
         pass
 
+    def record(self, **kwargs):
+        pass
+
 class ExampleMetric(BaseMetric):
     """示例评估指标实现"""
     def compute(self, predictions: List[int], data: Dict[str, Any]) -> Dict[str, float]:
